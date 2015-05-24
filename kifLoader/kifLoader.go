@@ -1,9 +1,9 @@
 package kifLoader
 
 import (
-	m "KifuLibrary-Logic/move"
 	"bufio"
 	"errors"
+	m "github.com/zaramme/KifCloud-Logic/move"
 	"os"
 	"strconv"
 	s "strings"

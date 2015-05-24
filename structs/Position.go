@@ -1,7 +1,7 @@
 package structs
 
 import (
-	def "KifuLibrary-Logic/define"
+	def "github.com/zaramme/KifCloud-Logic/define"
 	"strconv"
 )
 

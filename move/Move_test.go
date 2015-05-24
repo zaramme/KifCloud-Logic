@@ -1,8 +1,8 @@
 package move
 
 import (
-	def "KifuLibrary-Logic/define"
-	s "KifuLibrary-Logic/structs"
+	def "github.com/zaramme/KifCloud-Logic/define"
+	s "github.com/zaramme/KifCloud-Logic/structs"
 	"testing"
 )
 

@@ -1,10 +1,10 @@
 package routes
 
 import (
-	b "KifuLibrary-Logic/board"
-	k "KifuLibrary-Logic/kifLoader"
-	m "KifuLibrary-Logic/move"
-	r "KifuLibrary-Logic/rsh"
+	b "github.com/zaramme/KifCloud-Logic/board"
+	k "github.com/zaramme/KifCloud-Logic/kifLoader"
+	m "github.com/zaramme/KifCloud-Logic/move"
+	r "github.com/zaramme/KifCloud-Logic/rsh"
 )
 
 type Routes []Set

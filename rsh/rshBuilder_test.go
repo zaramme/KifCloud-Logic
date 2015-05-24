@@ -1,13 +1,13 @@
 package rsh
 
 import (
-	b "KifuLibrary-Logic/board"
-	"KifuLibrary-Logic/code"
-	def "KifuLibrary-Logic/define"
-	"KifuLibrary-Logic/math"
-	mv "KifuLibrary-Logic/move"
-	s "KifuLibrary-Logic/structs"
 	"fmt"
+	b "github.com/zaramme/KifCloud-Logic/board"
+	"github.com/zaramme/KifCloud-Logic/code"
+	def "github.com/zaramme/KifCloud-Logic/define"
+	"github.com/zaramme/KifCloud-Logic/math"
+	mv "github.com/zaramme/KifCloud-Logic/move"
+	s "github.com/zaramme/KifCloud-Logic/structs"
 	plmath "math"
 	"testing"
 )

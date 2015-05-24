@@ -1,9 +1,9 @@
 package move
 
 import (
-	def "KifuLibrary-Logic/define"
-	s "KifuLibrary-Logic/structs"
 	"errors"
+	def "github.com/zaramme/KifCloud-Logic/define"
+	s "github.com/zaramme/KifCloud-Logic/structs"
 	"strconv"
 )
 

@@ -1,8 +1,8 @@
 package code
 
 import (
-	"KifuLibrary-Logic/math"
 	"fmt"
+	"github.com/zaramme/KifCloud-Logic/math"
 	"strings"
 )
 

@@ -1,7 +1,7 @@
 package move
 
 import (
-	def "KifuLibrary-Logic/define"
+	def "github.com/zaramme/KifCloud-Logic/define"
 	s "strings"
 )
 

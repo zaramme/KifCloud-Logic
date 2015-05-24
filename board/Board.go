@@ -1,11 +1,10 @@
 package board
 
 import (
-	def "KifuLibrary-Logic/define"
-
-	m "KifuLibrary-Logic/move"
-	s "KifuLibrary-Logic/structs"
 	"errors"
+	def "github.com/zaramme/KifCloud-Logic/define"
+	m "github.com/zaramme/KifCloud-Logic/move"
+	s "github.com/zaramme/KifCloud-Logic/structs"
 	//"fmt"
 )
 

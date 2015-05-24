@@ -1,11 +1,11 @@
 package jsonConverter
 
 import (
-	b "KifuLibrary-Logic/board"
+	b "github.com/zaramme/KifCloud-Logic/board"
 	//	def "../define"
-	m "KifuLibrary-Logic/move"
-	r "KifuLibrary-Logic/rsh"
-	s "KifuLibrary-Logic/structs"
+	m "github.com/zaramme/KifCloud-Logic/move"
+	r "github.com/zaramme/KifCloud-Logic/rsh"
+	s "github.com/zaramme/KifCloud-Logic/structs"
 	//	"encoding/json"
 	//	"fmt"
 )

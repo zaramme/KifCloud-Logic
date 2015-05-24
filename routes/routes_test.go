@@ -1,8 +1,8 @@
 package routes
 
 import (
-	kl "KifuLibrary-Logic/kifLoader"
 	"fmt"
+	kl "github.com/zaramme/KifCloud-Logic/kifLoader"
 	"os"
 	"testing"
 )

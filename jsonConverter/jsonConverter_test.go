@@ -1,9 +1,9 @@
 package jsonConverter
 
 import (
-	//	b "KifuLibrary-Logic/board"
-	r "KifuLibrary-Logic/rsh"
+	//	b "github.com/zaramme/KifCloud-Logic/board"
 	"fmt"
+	r "github.com/zaramme/KifCloud-Logic/rsh"
 	"testing"
 )
 
