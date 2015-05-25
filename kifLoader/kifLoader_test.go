@@ -234,10 +234,6 @@ func Test_mappingMoves(t *testing.T) {
 		t.Error("指し手情報のマッピングに失敗しました")
 		return
 	}
-	if len(mList) != len(moveList) {
-		t.Errorf("マッピングされた指し手数が異なっています。期待値 = %d, 実測値 = %d", len(mList), len(moveList))
-		return
-	}
 	if !debug_mappingMove {
 		return
 	}

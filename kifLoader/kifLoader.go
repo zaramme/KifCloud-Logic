@@ -140,6 +140,10 @@ func mappingMoves(mList []string) (rList moveList, err error) {
 			fmt.Printf("[n = %d]コメント行を無視します", n)
 			continue
 		}
+		if len([]byte(line)) < 1 {
+			fmt.Printf("[n = %d]空行を無視します。")
+			continue
+		}
 		// 空行で分割
 		fields := s.Fields(line)
 		if len(fields) < 2 {
