@@ -53,6 +53,25 @@ func Test_GetNarray(t *testing.T) {
 	}
 }
 
+func Test_Get64Array(t *testing.T) {
+	asrt := func(id string, input int, exp []int) {
+		act := GetNary(input, 64)
+
+		if !assertArrayEquarl(exp, act) {
+			t.Errorf("[%s]64進数変換に失敗しました。input = %d, 期待値 = %v, 実際値 = %v", id, input, exp, act)
+		}
+	}
+
+	asrt("No.1", 1, []int{1})
+	asrt("No.2", 63, []int{63})
+	asrt("No.3", 64, []int{0, 1})
+	asrt("No.4", 65, []int{1, 1})
+	asrt("No.5", 64*64-1, []int{63, 63})
+	asrt("No.6", 64*64, []int{0, 0, 1})
+	asrt("No.7", 64*64+63, []int{63, 0, 1})
+	asrt("No.8", 64*64+64, []int{0, 1, 1})
+}
+
 func Test_ReverseNary(t *testing.T) {
 	assert_ReverseNary(t, []int{0, 0, 1}, 100, 10)
 	assert_ReverseNary(t, []int{1, 2, 3}, 1+12*2+12*12*3, 12)

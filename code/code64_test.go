@@ -18,6 +18,23 @@ func Test_NewCode64FromInt_複数桁をコンストラクタ(t *testing.T) {
 	}
 }
 
+func Test_NewCode64FromInt_桁上がりチェック(t *testing.T) {
+
+	asrt := func(n int, exp string) {
+		var target = NewCode64FromInt(n)
+		if target.ToString() != exp {
+			t.Errorf("期待値と出力文字列が異なります。期待値 = %s 実際値 = %s", exp, target.ToString())
+
+		}
+	}
+
+	asrt(1, "1")
+	asrt(63, "-")
+	asrt(64, "10")
+	asrt(65, "11")
+	asrt(64+63, "1-")
+}
+
 func Test_NewCode64FromInt_一桁をコンストラクタ(t *testing.T) {
 	var target = NewCode64FromInt(30)
 
@@ -29,14 +46,36 @@ func Test_NewCode64FromInt_一桁をコンストラクタ(t *testing.T) {
 	}
 }
 
-// func Test_NewCode64FromString_ゼロプレフィックス(t *testing.T) {
-// 	var target, _ = NewCode64FromString("004")
+func Test_NewCode64FromString(t *testing.T) {
 
-// 	if target.ToInt() != 4 {
-// 		t.Errorf("期待値と数値が異なります。%s = %s", target.ToInt(), 4)
-// 	}
+	asrt := func(input string, exp string) {
+		target, err := NewCode64FromString(input)
+		if err != nil {
+			t.Errorf("変換エラーを検出しました。 input = %s [Error]%s", input, err.Error())
+		}
+		if target.ToString() != exp {
+			t.Errorf("期待値と出力文字列が異なります。期待値 = %s 実際値 = %s", exp, target.ToString())
+		}
+	}
 
-// }
+	asrt("1", "1")
+	asrt("123456", "123456")
+	asrt("7890a", "7890a")
+	asrt("aAbBcCdD", "aAbBcCdD")
+	asrt("EeFfGgHhIiJjKk", "EeFfGgHhIiJjKk")
+	asrt("opqrstu", "opqrstu")
+	asrt("vwxyz_-", "vweyz_-")
+
+}
+
+func Test_NewCode64FromString_ゼロプレフィックス(t *testing.T) {
+	var target, _ = NewCode64FromString("004")
+
+	if target.ToInt() != 4 {
+		t.Errorf("期待値と数値が異なります。%s = %s", target.ToInt(), 4)
+	}
+
+}
 
 func Test_Unpadding(t *testing.T) {
 	var target, _ = NewCode64FromString("0004")
@@ -44,7 +83,43 @@ func Test_Unpadding(t *testing.T) {
 	actual := target.Unpadding()
 
 	if actual.ToInt() != 4 {
-		t.Errorf("期待値と数値が異なります。%s = %s", target.ToInt(), 4)
+		t.Errorf("期待値と数値が異なります。%d = %d", target.ToInt(), 4)
+	}
+}
+
+func Test_Unpadding_全て０(t *testing.T) {
+	var target, _ = NewCode64FromString("000")
+
+	a := target.Unpadding()
+
+	if a.ToInt() != 0 {
+		t.Errorf("期待値と数値が異なります。%s = %s", a.ToInt(), 0)
+	}
+}
+
+func Test_Padding_Unpadding_逆関数チェック(t *testing.T) {
+	// 64 * 64 * 64 - 1 までの数値をパディング〜パディング解除して数値変化がないことを確認
+
+	errCount := 0
+
+	for i := 0; i < 64*64*64; i++ {
+		before := NewCode64FromInt(i)
+		padding := before.Padding(3)
+		//		after := padding.Unpadding()
+
+		after := padding.Unpadding()
+
+		if after.ToInt() != i {
+			t.Errorf("パディングによる破壊を検出しました。 i = %s(%d), padding = %s, result = %s(%d)", before.ToString(), i, padding.ToString(), after.ToString(), after.ToInt())
+
+			errCount++
+
+			if errCount > 100 {
+				t.Errorf("too many errors")
+				return
+			}
+		}
+
 	}
 }
 
@@ -109,7 +184,7 @@ func Test_ToString(t *testing.T) {
 	c := NewCode64FromInt(64*64*11 + 64*21 + 31) //KFA
 
 	actual := c.ToString()
-	expected := "KFA"
+	expected := "AFK"
 	if actual != expected {
 		t.Errorf("期待値と異なる値に変換されました。expected=%s, actual=%s", expected, actual)
 	}

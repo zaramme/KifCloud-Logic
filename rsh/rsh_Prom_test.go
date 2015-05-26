@@ -60,11 +60,11 @@ func Test_getAndPutProm_Rsh経由変換(t *testing.T) {
 			return
 		}
 
-		fmt.Printf("%s\n", curr)
+		//fmt.Printf("%s\n", curr)
 		brdprom := BuildBoardFromRshCode(rsh2)
-		for pos, ps := range brdprom.PositionMap {
+		for _, ps := range brdprom.PositionMap {
 			if ps.IsPromoted {
-				fmt.Printf("---- %s, %s\n", pos.Output(), ps.KindOfPiece.ToString())
+				//fmt.Printf("---- %s, %s\n", pos.Output(), ps.KindOfPiece.ToString())
 			}
 		}
 	}

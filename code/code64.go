@@ -36,7 +36,7 @@ func NewCode64FromString(str string) (code64 Code64, err error) {
 
 	byteList := []byte(str)
 	for i := 0; i < len(str); i++ {
-		code64char := newCode64CharfromString(string(byteList[i]))
+		code64char := newCode64CharfromString(string(byteList[len(str)-1-i]))
 		code64[i] = code64char
 	}
 	return code64, err
@@ -66,15 +66,20 @@ func (this Code64) Padding(n int) Code64 {
 
 	zero := NewCode64FromInt(0)
 	for i := len(this); i < n; i++ {
-		this = append(zero, this...)
+
+		this = append(this, zero...)
 	}
 
 	return this
 }
 
 func (this Code64) Unpadding() Code64 {
-	for this[0].getNum() == 0 {
-		this = this[1:]
+	for this[len(this)-1].getNum() == 0 {
+		this = this[:(len(this) - 1)]
+
+		if len(this) == 1 {
+			return this
+		}
 	}
 
 	return this
@@ -82,8 +87,15 @@ func (this Code64) Unpadding() Code64 {
 
 func (this Code64) ToString() string {
 	b := make([]byte, 0)
+
+	pushFirst := func(s string) []byte {
+		first := []byte(s)
+		_b := append(first, b...)
+		return _b
+	}
+
 	for i := 0; i <= len(this)-1; i++ {
-		b = append(b, this[i].Code...)
+		b = pushFirst(this[i].Code)
 	}
 	return string(b)
 }
