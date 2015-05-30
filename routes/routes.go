@@ -39,8 +39,10 @@ func NewRoutesFromKifuFile(kif *k.KifFile) (rou Routes, err error) {
 	Routes := make(Routes, len(kif.Moves))
 
 	for i, desk := range kif.Moves {
-		rsh := r.ConvertRshFromBoard(currentboard)
-
+		rsh, err := r.ConvertRshFromBoard(currentboard)
+		if err != nil {
+			return nil, err
+		}
 		move, ok := desk.(*m.Move)
 
 		if !ok {
@@ -49,12 +51,21 @@ func NewRoutesFromKifuFile(kif *k.KifFile) (rou Routes, err error) {
 			break
 		}
 
-		Routes[i] = Set{
-			rsh.ToString(), "", move}
-		if i != 0 {
-			Routes[i-1].Current = rsh.ToString()
+		str, err := rsh.ToString()
+		if err != nil {
+			return nil, err
 		}
-		err := currentboard.AddMove(move)
+		Routes[i] = Set{
+			str, "", move}
+
+		if i != 0 {
+			str2, err := rsh.ToString()
+			if err != nil {
+				return nil, err
+			}
+			Routes[i-1].Current = str2
+		}
+		err = currentboard.AddMove(move)
 
 		if err != nil {
 			return Routes, err

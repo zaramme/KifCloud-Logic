@@ -38,9 +38,18 @@ func BoardToJson(brd *b.Board) (output shell, err error) {
 	var shl shell
 
 	shl.Turn = bool(brd.Turn)
-	rsh := r.ConvertRshFromBoard(brd)
-	shl.Rsh = rsh.ToString()
-	shl.Info.RshCurrent = rsh.ToString()
+	rsh, err := r.ConvertRshFromBoard(brd)
+	if err != nil {
+		return shl, err
+	}
+	shl.Rsh, err = rsh.ToString()
+	if err != nil {
+		return shl, err
+	}
+	shl.Info.RshCurrent, err = rsh.ToString()
+	if err != nil {
+		return shl, err
+	}
 	index := 0
 	addPiece := func(p *piece) {
 		shl.Pieces[index] = p
@@ -97,6 +106,19 @@ func (this *shell) AppendLastMove(m *m.Move) error {
 		return err
 	}
 
-	this.Info.RshCurrent = r.ConvertRshFromBoard(brd).ToString()
+	rshObj, err := r.ConvertRshFromBoard(brd)
+	if err != nil {
+		return err
+	}
+
+	rshCurrent, err := rshObj.ToString()
+	if err != nil {
+		return err
+	}
+
+	this.Info.RshCurrent = rshCurrent
+	if err != nil {
+		return err
+	}
 	return nil
 }
