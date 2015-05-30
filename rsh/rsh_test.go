@@ -38,13 +38,25 @@ func Test_BoardToString(t *testing.T) {
 
 func Test_ComposeAndDevideTKandAddP16exCap(t *testing.T) {
 
+	catchError := func(err error) {
+		if err != nil {
+			t.Errorf("エラーを検出しました。... %e", err)
+		}
+	}
+
 	testCase := func(tk, addP16 int) {
-		tkCode := code.NewCode64FromInt(tk)
-		addP16Code := code.NewCode64FromInt(addP16)
+		tkCode, err := code.NewCode64FromInt(tk)
+		catchError(err)
+		addP16Code, err := code.NewCode64FromInt(addP16)
+		catchError(err)
 
-		composite := composeAddTkAndAddP16ExCap(tkCode, addP16Code, false)
+		composite, err := composeAddTkAndAddP16ExCap(tkCode, addP16Code, false)
+		catchError(err)
 
-		tkCodeDiveded, addP16CodeDevided, _ := divideADDTkAndAddP16ExCap(composite)
+		tkCodeDiveded, addP16CodeDevided, _, err := divideADDTkAndAddP16ExCap(composite)
+		if err != nil {
+			t.Errorf("エラーを検出しました。... %e", err)
+		}
 
 		if tkCode.ToInt() != tkCodeDiveded.ToInt() || addP16Code.ToInt() != addP16CodeDevided.ToInt() {
 			t.Errorf("TK-AddP16の合成・分割処理に失敗しました。Imput = [%d,%d] Composite = [%d] Output = [%d,%d]",
@@ -120,8 +132,12 @@ func Test_NewRshCodeFromString_ToString_初期盤面(t *testing.T) {
 			t.Error("変換に失敗しました")
 		}
 
-		if str != rsh.ToString() {
-			t.Errorf("rshの文字列変換に失敗しました。\n----変換前=%s\n----変換後=%s, ", str, rsh.ToString())
+		str2, err := rsh.ToString()
+		if err != nil {
+			t.Errorf("エラーが発生しました。[%s]", err)
+		}
+		if str != str2 {
+			t.Errorf("rshの文字列変換に失敗しました。\n----変換前=%s\n----変換後=%s, ", str, str2)
 		}
 	}
 

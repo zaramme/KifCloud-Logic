@@ -34,8 +34,14 @@ func Test_ケース１_成り駒のエンコーディング(t *testing.T) {
 	assert_PieceState(piece, def.HISHA, def.WHITE, true, t)
 
 	// （１）Rshオブジェクト　→　Rsh文字列　→　boardオブジェクトの順で変換
-	rsh := ConvertRshFromBoard(brd)
-	rshString := rsh.ToString()
+	rsh, err := ConvertRshFromBoard(brd)
+	if err != nil {
+		t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+	}
+	rshString, err := rsh.ToString()
+	if err != nil {
+		t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+	}
 	brd2 := strToBoard(rshString, t)
 
 	// 変換後、飛車の成り位置が変わらないことを確認

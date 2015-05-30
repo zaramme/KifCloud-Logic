@@ -103,7 +103,7 @@ func NewRshCodeFromString(s string) (rsh *RshCode, err error) {
 	err = nil
 	rsh = NewRshCodeInit()
 
-	extract := func(start, end int) string {
+	extract := func(start, end int) (str string) {
 		r := []byte(s)
 		return string(r[start:end])
 	}
@@ -125,7 +125,10 @@ func NewRshCodeFromString(s string) (rsh *RshCode, err error) {
 	composite, _ := code.NewCode64FromString(extract(39, 40))
 	existAddProm := false
 	//fmt.Printf("composite=%d \n", composite.ToInt())
-	rsh.Add_TK, rsh.Add_P18ExCap, existAddProm = divideADDTkAndAddP16ExCap(composite)
+	rsh.Add_TK, rsh.Add_P18ExCap, existAddProm, err = divideADDTkAndAddP16ExCap(composite)
+	if err != nil {
+		return nil, err
+	}
 	rshLength := len(s)
 
 	if existAddProm {
@@ -163,7 +166,7 @@ func (this *RshCode) HasAdditionalCodes() bool {
 	return result
 }
 
-func (this *RshCode) ToString() string {
+func (this *RshCode) ToString() (str string, err error) {
 	strList := make([]byte, 0)
 
 	// base
@@ -178,14 +181,17 @@ func (this *RshCode) ToString() string {
 	strList = append(strList, this.Base_P18Cap.ToString()...)
 
 	if !this.HasAdditionalCodes() {
-		return string(strList) // addが無い場合はスキップ
+		return string(strList), nil // addが無い場合はスキップ
 	}
 
 	// 付加コードの追加
 	strList = append(strList, SEPARETOR)
 
 	isExistAddProm := len(this.Add_Prom) > 0
-	composite := composeAddTkAndAddP16ExCap(this.Add_TK, this.Add_P18ExCap, isExistAddProm)
+	composite, err := composeAddTkAndAddP16ExCap(this.Add_TK, this.Add_P18ExCap, isExistAddProm)
+	if err != nil {
+		return "", err
+	}
 	strList = append(strList, composite.ToString()...)
 
 	if len(this.Add_Prom) > 0 {
@@ -197,11 +203,11 @@ func (this *RshCode) ToString() string {
 		strList = append(strList, this.Add_P18Prom.ToString()...)
 	}
 
-	return string(strList)
+	return string(strList), nil
 
 }
 
-func composeAddTkAndAddP16ExCap(add_TK, add_P16ExCap code.Code64, isExistAddProm bool) code.Code64 {
+func composeAddTkAndAddP16ExCap(add_TK, add_P16ExCap code.Code64, isExistAddProm bool) (c code.Code64, err error) {
 
 	digitTK := 0
 	if len(add_TK) > 0 {
@@ -218,12 +224,14 @@ func composeAddTkAndAddP16ExCap(add_TK, add_P16ExCap code.Code64, isExistAddProm
 		digit = digit + 32
 	}
 
-	composite := code.NewCode64FromInt(digit)
-
-	return composite
+	composite, err := code.NewCode64FromInt(digit)
+	if err != nil {
+		return nil, err
+	}
+	return composite, nil
 }
 
-func divideADDTkAndAddP16ExCap(composite code.Code64) (add_tk, add_p16exCap code.Code64, ExistAddProm bool) {
+func divideADDTkAndAddP16ExCap(composite code.Code64) (add_tk, add_p16exCap code.Code64, ExistAddProm bool, err error) {
 	compositeInt := composite.ToInt()
 
 	ExistAddProm = false
@@ -232,10 +240,16 @@ func divideADDTkAndAddP16ExCap(composite code.Code64) (add_tk, add_p16exCap code
 		ExistAddProm = true
 	}
 
-	add_tk = code.NewCode64FromInt((compositeInt / 6))
-	add_p16exCap = code.NewCode64FromInt((compositeInt % 6))
+	add_tk, err = code.NewCode64FromInt((compositeInt / 6))
+	if err != nil {
+		return nil, nil, false, err
+	}
+	add_p16exCap, err = code.NewCode64FromInt((compositeInt % 6))
+	if err != nil {
+		return nil, nil, false, err
+	}
 
-	return add_tk, add_p16exCap, ExistAddProm
+	return add_tk, add_p16exCap, ExistAddProm, nil
 }
 
 // func (this *RshCode) getTKfromBoard() {

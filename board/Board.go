@@ -2,10 +2,10 @@ package board
 
 import (
 	"errors"
+	"fmt"
 	def "github.com/zaramme/KifCloud-Logic/define"
 	m "github.com/zaramme/KifCloud-Logic/move"
 	s "github.com/zaramme/KifCloud-Logic/structs"
-	//"fmt"
 )
 
 type Board struct {
@@ -91,6 +91,52 @@ func (board Board) init() {
 
 func (board Board) GetHashID() {
 
+}
+
+func (board *Board) isValid() (isValid bool, errOutput string) {
+
+	isValid = false
+
+	bOutput := make([]byte, 0)
+	appendErr := func(str string) {
+		bOutput = append(bOutput, []byte(str)...)
+	}
+
+	// 盤上の駒の枚数を数える
+	count := make(map[def.KindOfPiece]int)
+
+	for _, ps := range board.PositionMap {
+		count[ps.KindOfPiece]++
+	}
+
+	// 駒台上の駒を数える
+	for area, num := range board.CapturedMap {
+		count[area.KindOfPiece] += num
+		if num < 0 {
+			isValid = false
+			appendErr(fmt.Sprintln("持ち駒の値が不正です(%s => %d)", area.Output(), num))
+		}
+	}
+
+	// それぞれの種類別の駒の数
+	limitByKop := make(map[def.KindOfPiece]int)
+	limitByKop[def.OH] = 2
+	limitByKop[def.HISHA] = 2
+	limitByKop[def.KAKU] = 2
+	limitByKop[def.KIN] = 4
+	limitByKop[def.GIN] = 4
+	limitByKop[def.KEI] = 4
+	limitByKop[def.KYO] = 4
+	limitByKop[def.FU] = 18
+
+	for kop, num := range count {
+		if num > limitByKop[kop] {
+			isValid = false
+			appendErr(fmt.Sprintln("持ち駒の値が不正です[(%s => %d)", kop.ToString(), num))
+		}
+
+	}
+	return isValid, string(bOutput)
 }
 
 // 局面を進める

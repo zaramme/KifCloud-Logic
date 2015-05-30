@@ -205,7 +205,10 @@ func Test_getKYOfromBoard_持ち駒込みの復元照合(t *testing.T) {
 func Test_getP18fromBoard_初期盤面の復元照合(t *testing.T) {
 	rsh := new(RshCode)
 	rsh.Board = b.NewBoardInit()
-	pBlack, pWhite, pCap, _, _ := getP18fromBoard(rsh.Board)
+	pBlack, pWhite, pCap, _, _, err := getP18fromBoard(rsh.Board)
+	if err != nil {
+		t.Errorf("エラーを検出しました。 error = [%s]", err.Error())
+	}
 
 	assert_IsP18Position(pBlack, 777777777, t)
 	assert_IsP18Position(pWhite, 333333333, t)
@@ -301,10 +304,16 @@ func Test_getProPsfromBoard_最小値(t *testing.T) {
 	move := mv.NewMoveFromMoveCode("b11HI_28!")
 	rsh.Board.AddMove(move)
 
-	actual := getPromfromBoard(rsh.Board)
+	actual, err := getPromfromBoard(rsh.Board)
+	if err != nil {
+		t.Errorf("エラーを検出しました。error = [%s]", err.Error())
+	}
 	var expected code.Code64
 
-	expected = code.NewCode64FromInt(1)
+	expected, err = code.NewCode64FromInt(1)
+	if err != nil {
+		t.Errorf("エラーを検出しました。error = [%s]", err.Error())
+	}
 	expected = expected.Padding(3)
 	assert_Code64Equals(expected, actual, "props_1", t)
 }
@@ -322,10 +331,16 @@ func Test_getProPsfromBoard_最大値(t *testing.T) {
 	rsh.Board.AddMove(move)
 	rsh.Board.AddMove(move2)
 
-	actual := getPromfromBoard(rsh.Board)
+	actual, err := getPromfromBoard(rsh.Board)
+	if err != nil {
+		t.Errorf("エラーを検出しました。error = [%s]", err.Error())
+	}
 	var expected code.Code64
 
-	expected = code.NewCode64FromInt(int(plmath.Pow(2, 15)))
+	expected, err = code.NewCode64FromInt(int(plmath.Pow(2, 15)))
+	if err != nil {
+		t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+	}
 	expected = expected.Padding(3)
 	assert_Code64Equals(expected, actual, "props_1", t)
 }
@@ -338,7 +353,10 @@ func Test_getProPsfromBoard_最小から最大(t *testing.T) {
 	testUnit := func(moveCode string, expected []int) {
 		move := mv.NewMoveFromMoveCode(moveCode)
 		rsh.Board.AddMove(move)
-		actual := getPromfromBoard(rsh.Board)
+		actual, err := getPromfromBoard(rsh.Board)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 
 		cur := 1
 		expectedDigit := 0
@@ -347,7 +365,10 @@ func Test_getProPsfromBoard_最小から最大(t *testing.T) {
 			cur *= 2
 		}
 		//		fmt.Printf("現在のexpectedDigit = %d\n", expectedDigit)
-		expectedCode64 := code.NewCode64FromInt(expectedDigit)
+		expectedCode64, err := code.NewCode64FromInt(expectedDigit)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 		expectedCode64 = expectedCode64.Padding(3)
 
 		assert_Code64Equals(expectedCode64, actual, moveCode, t)

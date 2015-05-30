@@ -12,7 +12,10 @@ func Test_BuildBoardFromRshCode_初期盤面(t *testing.T) {
 
 	testCase := func(expectedBoard *b.Board) {
 
-		rsh := ConvertRshFromBoard(expectedBoard)
+		rsh, err := ConvertRshFromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 		actualboard := BuildBoardFromRshCode(rsh)
 
 		assert_EachPositionOfBoard(expectedBoard, actualboard, "init", t)
@@ -27,7 +30,11 @@ func Test_BuildBoardFromRshCode_初期盤面全部成り駒(t *testing.T) {
 
 	testCase := func(expectedBoard *b.Board) {
 
-		rsh := ConvertRshFromBoard(expectedBoard)
+		rsh, err := ConvertRshFromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
+
 		actualboard := BuildBoardFromRshCode(rsh)
 
 		assert_EachPositionOfBoard(expectedBoard, actualboard, "initProm", t)
@@ -158,7 +165,10 @@ func Test_rsh_putPieceFromP16_Position_1(t *testing.T) {
 	rsh := new(RshCode)
 	rsh.Board = b.NewBoard()
 
-	input := code.NewCode64FromInt(123456789)
+	input, err := code.NewCode64FromInt(123456789)
+	if err != nil {
+		t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+	}
 	putPiecefromP16_Position(input, def.BLACK, rsh.Board)
 	assert_PieceExistsOnPosition(rsh.Board, s.Position{1, 9}, s.PieceStates{def.BLACK, false, def.FU}, t)
 	assert_PieceExistsOnPosition(rsh.Board, s.Position{2, 8}, s.PieceStates{def.BLACK, false, def.FU}, t)
@@ -175,7 +185,7 @@ func Test_rsh_putPieceFromP16_Position_2(t *testing.T) {
 	rsh := new(RshCode)
 	rsh.Board = b.NewBoard()
 
-	input := code.NewCode64FromInt(90909090)
+	input, _ := code.NewCode64FromInt(90909090)
 	putPiecefromP16_Position(input, def.WHITE, rsh.Board)
 	assert_PieceNotExistsOnVarticalLine(rsh.Board, 1, t)
 	assert_PieceExistsOnPosition(rsh.Board, s.Position{2, 9}, s.PieceStates{def.WHITE, false, def.FU}, t)
@@ -191,10 +201,15 @@ func Test_rsh_putPieceFromP16_Position_2(t *testing.T) {
 func Test_rsh_putPieceFromP16_Captured_baseの範囲(t *testing.T) {
 
 	testCase := func(P18Cap, expBlack, expWhite int) {
+		var err error
 		rsh := new(RshCode)
 		rsh.Board = b.NewBoard()
-		rsh.Base_P18Cap = code.NewCode64FromInt(P18Cap)
-		putPiecefromP16_Captured(rsh.Base_P18Cap, code.NewCode64FromInt(0), rsh.Board)
+		rsh.Base_P18Cap, err = code.NewCode64FromInt(P18Cap)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
+		codeOfZero, _ := code.NewCode64FromInt(0)
+		putPiecefromP16_Captured(rsh.Base_P18Cap, codeOfZero, rsh.Board)
 
 		assert_CapturedPieceNum(rsh.Board, s.CapArea{def.BLACK, def.FU}, expBlack, t)
 		assert_CapturedPieceNum(rsh.Board, s.CapArea{def.WHITE, def.FU}, expWhite, t)
@@ -239,10 +254,18 @@ func Test_rsh_putPieceFromP16_Captured_baseの範囲(t *testing.T) {
 func Test_rsh_putPieceFromP16_Captured_add使用(t *testing.T) {
 
 	testCase := func(P18Cap, P18Add, expBlack, expWhite int) {
+		var err error
 		rsh := new(RshCode)
 		rsh.Board = b.NewBoard()
-		rsh.Base_P18Cap = code.NewCode64FromInt(P18Cap)
-		rsh.Add_P18ExCap = code.NewCode64FromInt(P18Add)
+		rsh.Base_P18Cap, err = code.NewCode64FromInt(P18Cap)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
+		rsh.Add_P18ExCap, err = code.NewCode64FromInt(P18Add)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
+
 		putPiecefromP16_Captured(rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Board)
 
 		assert_CapturedPieceNum(rsh.Board, s.CapArea{def.BLACK, def.FU}, expBlack, t)

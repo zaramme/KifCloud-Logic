@@ -62,13 +62,13 @@ func putPieceFromN164Ary(brd *b.Board, n164Ary math.N164ary, kop def.KindOfPiece
 
 func convert164AryToBase64(n164Array math.N164ary) (code64 code.Code64) {
 	digit := math.Reverse164Ary(n164Array)
-	code64 = code.NewCode64FromInt(digit)
+	code64, _ = code.NewCode64FromInt(digit)
 	return code64
 }
 
 func convert45AryToBase64(n45Array []int) (code64 code.Code64) {
 	digit := math.ReverseNary(n45Array, 45)
-	code64 = code.NewCode64FromInt(digit)
+	code64, _ = code.NewCode64FromInt(digit)
 	return code64
 }
 

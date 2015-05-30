@@ -79,7 +79,7 @@ func BoardToJson(brd *b.Board) (output shell, err error) {
 	return shl, nil
 }
 
-func (this *shell) AppendLastMove(m *m.Move) {
+func (this *shell) AppendLastMove(m *m.Move) error {
 	this.Info.RshPrev = this.Info.RshCurrent
 	this.Info.LastMoveCode = m.ToMoveCode()
 	this.Info.LastJsCode = m.ToJsCode()
@@ -88,11 +88,15 @@ func (this *shell) AppendLastMove(m *m.Move) {
 
 	rsh, err := r.NewRshCodeFromString(this.Info.RshPrev)
 	if err != nil {
-		return
+		return err
 	}
 	brd := r.BuildBoardFromRshCode(rsh)
 
-	brd.AddMove(m)
+	err = brd.AddMove(m)
+	if err != nil {
+		return err
+	}
 
 	this.Info.RshCurrent = r.ConvertRshFromBoard(brd).ToString()
+	return nil
 }

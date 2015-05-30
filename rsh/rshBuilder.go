@@ -19,20 +19,26 @@ func __() {
 
 }
 
-func ConvertRshFromBoard(brd *b.Board) *RshCode {
-	rsh := new(RshCode)
-	rsh.Base_TK, rsh.Add_TK = getTKfromBoard(brd)
+func ConvertRshFromBoard(brd *b.Board) (rsh *RshCode, err error) {
+	rsh = new(RshCode)
+	rsh.Base_TK, rsh.Add_TK, _ = getTKfromBoard(brd)
 	rsh.Base_M2 = getM2fromBoard(brd)
 	rsh.Base_KIN = getKINfromBoard(brd)
 	rsh.Base_GIN = getGINfromBoard(brd)
 	rsh.Base_KEI = getKEIfromBoard(brd)
 	rsh.Base_KYO = getKYOfromBoard(brd)
-	rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom = getP18fromBoard(brd)
-	rsh.Add_Prom = getPromfromBoard(brd)
-	return rsh
+	rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom, err = getP18fromBoard(brd)
+	if err != nil {
+		return nil, err
+	}
+	rsh.Add_Prom, err = getPromfromBoard(brd)
+	if err != nil {
+		return nil, err
+	}
+	return rsh, nil
 }
 
-func getTKfromBoard(brd *b.Board) (tk, add_tk code.Code64) {
+func getTKfromBoard(brd *b.Board) (tk, add_tk code.Code64, err error) {
 	// その座標の駒が王かどうかを判定して、王ならPieceStatesを返す
 	search := func(x, y int) (isFound bool, ps s.PieceStates) {
 
@@ -78,11 +84,16 @@ func getTKfromBoard(brd *b.Board) (tk, add_tk code.Code64) {
 	tk_int := int_tk_black + int_tk_white*45 + shift
 	//fmt.Printf("----(building)tk__int＝{%d}\n", tk_int)
 
-	tk = code.NewCode64FromInt(tk_int)
+	tk, err = code.NewCode64FromInt(tk_int)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	add_tk = code.NewCode64FromInt(add_tk_black + add_tk_white*2)
-
-	return tk, add_tk
+	add_tk, err = code.NewCode64FromInt(add_tk_black + add_tk_white*2)
+	if err != nil {
+		return nil, nil, err
+	}
+	return tk, add_tk, nil
 }
 
 // 玉の座標を４５進数＋シフトに変換
@@ -139,7 +150,7 @@ func getKYOfromBoard(brd *b.Board) code.Code64 {
 	return convert164AryToBase64(n164Array)
 }
 
-func getP18fromBoard(brd *b.Board) (black, white, cap, add_Prom, add_ExCap code.Code64) {
+func getP18fromBoard(brd *b.Board) (black, white, cap, add_Prom, add_ExCap code.Code64, err error) {
 	digitBlack := 0
 	digitWhite := 0
 
@@ -175,8 +186,14 @@ func getP18fromBoard(brd *b.Board) (black, white, cap, add_Prom, add_ExCap code.
 
 	//fmt.Printf("black = %d\n", digitBlack)
 	//fmt.Printf("white = %d\n", digitWhite)
-	black = code.NewCode64FromInt(digitBlack)
-	white = code.NewCode64FromInt(digitWhite)
+	black, err = code.NewCode64FromInt(digitBlack)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	white, err = code.NewCode64FromInt(digitWhite)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
 
 	promLength := len(n164Array)
 
@@ -188,7 +205,8 @@ func getP18fromBoard(brd *b.Board) (black, white, cap, add_Prom, add_ExCap code.
 	appendCode64seven := func(n164array []int) {
 		code64seven := convert164AryToBase64(n164array)
 		for len(code64seven) < 7 {
-			code64seven = append(code64seven, code.NewCode64FromInt(0)...)
+			codeOfZero, _ := code.NewCode64FromInt(0)
+			code64seven = append(code64seven, codeOfZero...)
 		}
 		add_Prom = append(add_Prom, code64seven...)
 	}
@@ -261,12 +279,19 @@ func getP18fromBoard(brd *b.Board) (black, white, cap, add_Prom, add_ExCap code.
 		digitAddBlackAndWhite = 5
 	}
 
-	cap = code.NewCode64FromInt(digitCapturedBlack + digitCapturedWhite*8)
-	add_ExCap = code.NewCode64FromInt(digitAddBlackAndWhite)
-	return black, white, cap, add_ExCap, add_Prom
+	cap, err = code.NewCode64FromInt(digitCapturedBlack + digitCapturedWhite*8)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+
+	add_ExCap, err = code.NewCode64FromInt(digitAddBlackAndWhite)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	return black, white, cap, add_ExCap, add_Prom, nil
 }
 
-func getPromfromBoard(brd *b.Board) code.Code64 {
+func getPromfromBoard(brd *b.Board) (c code.Code64, err error) {
 	pieceCount := 0
 	promMap := make([]int, 16)
 
@@ -303,13 +328,16 @@ func getPromfromBoard(brd *b.Board) code.Code64 {
 	}
 
 	if promDigit == 0 {
-		return code.NewCode64Nil()
+		return code.NewCode64Nil(), nil
 	}
 
 	// ２文字以下の場合は３文字まで０を埋める
-	prom := code.NewCode64FromInt(promDigit)
+	prom, err := code.NewCode64FromInt(promDigit)
+	if err != nil {
+		return nil, err
+	}
 	prom = prom.Padding(3)
-	return prom
+	return prom, nil
 }
 
 func getPieceCodesByKindOfPiece(kop def.KindOfPiece, brd *b.Board) (result math.N164ary) {

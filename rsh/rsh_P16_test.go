@@ -172,6 +172,7 @@ func Test_getAndputP16Prom_1から10駒(t *testing.T) {
 	// テストパターン
 	testCase := func(posList []s.Position, plyList []def.Player) {
 
+		var err error
 		expectedBoard := b.NewBoard()
 
 		// 盤面の設定
@@ -184,7 +185,10 @@ func Test_getAndputP16Prom_1から10駒(t *testing.T) {
 		// 盤面　→　コード　→　盤面
 		rsh = NewRshCodeInit()
 		//		fmt.Println("★Builder")
-		rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom = getP18fromBoard(expectedBoard)
+		rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom, err = getP18fromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 		//		fmt.Println("★Reader")
 		putPiecefromP16(rsh)
 

@@ -21,13 +21,17 @@ func NewCode64Nil() Code64 {
 	return make(Code64, 0)
 }
 
-func NewCode64FromInt(num int) Code64 {
+func NewCode64FromInt(num int) (c Code64, err error) {
 	ary := math.Convert64Ary(num) //64進数配列に変換
-	c := make(Code64, 0)
+	c = make(Code64, 0)
 	for i := 0; i < len(ary); i++ {
-		c = append(c, newCode64CharfromInt(ary[i]))
+		c64char, err := newCode64CharfromInt(ary[i])
+		if err != nil {
+			return nil, err
+		}
+		c = append(c, c64char)
 	}
-	return c
+	return c, nil
 }
 
 func NewCode64FromString(str string) (code64 Code64, err error) {
@@ -64,7 +68,7 @@ func (this Code64) Padding(n int) Code64 {
 		return this
 	}
 
-	zero := NewCode64FromInt(0)
+	zero, _ := NewCode64FromInt(0)
 	for i := len(this); i < n; i++ {
 
 		this = append(this, zero...)
@@ -105,14 +109,15 @@ type code64char struct {
 	Code string
 }
 
-func newCode64CharfromInt(num int) *code64char {
+func newCode64CharfromInt(num int) (c64Char *code64char, err error) {
 	if num < 0 {
-		fmt.Println("numが不正です")
+		err = fmt.Errorf("newCode64fromIntに負の値が入力されました num = %d", num)
+		return nil, err
 	}
 	instance := new(code64char)
 	instance.Num = num
 	instance.Code = instance.getCode()
-	return instance
+	return instance, nil
 }
 
 func newCode64CharfromString(code string) *code64char {

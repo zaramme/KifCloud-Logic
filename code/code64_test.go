@@ -5,8 +5,10 @@ import (
 )
 
 func Test_NewCode64FromInt_複数桁をコンストラクタ(t *testing.T) {
-	var target = NewCode64FromInt(64*64*58 + 64*20 + 33)
-
+	var target, err = NewCode64FromInt(64*64*58 + 64*20 + 33)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	if target[0].Num != 33 {
 		t.Errorf("期待値と数値が異なります i=0", target[0].Num)
 	}
@@ -21,7 +23,11 @@ func Test_NewCode64FromInt_複数桁をコンストラクタ(t *testing.T) {
 func Test_NewCode64FromInt_桁上がりチェック(t *testing.T) {
 
 	asrt := func(n int, exp string) {
-		var target = NewCode64FromInt(n)
+		var target, err = NewCode64FromInt(n)
+		if err != nil {
+			t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+		}
+
 		if target.ToString() != exp {
 			t.Errorf("期待値と出力文字列が異なります。期待値 = %s 実際値 = %s", exp, target.ToString())
 
@@ -36,7 +42,10 @@ func Test_NewCode64FromInt_桁上がりチェック(t *testing.T) {
 }
 
 func Test_NewCode64FromInt_一桁をコンストラクタ(t *testing.T) {
-	var target = NewCode64FromInt(30)
+	var target, err = NewCode64FromInt(30)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 
 	if target[0].Num != 30 {
 		t.Errorf("期待値と数値が異なります", target[0].Num)
@@ -64,7 +73,7 @@ func Test_NewCode64FromString(t *testing.T) {
 	asrt("aAbBcCdD", "aAbBcCdD")
 	asrt("EeFfGgHhIiJjKk", "EeFfGgHhIiJjKk")
 	asrt("opqrstu", "opqrstu")
-	asrt("vwxyz_-", "vweyz_-")
+	asrt("vwxyz_-", "vwxyz_-")
 
 }
 
@@ -103,7 +112,10 @@ func Test_Padding_Unpadding_逆関数チェック(t *testing.T) {
 	errCount := 0
 
 	for i := 0; i < 64*64*64; i++ {
-		before := NewCode64FromInt(i)
+		before, err := NewCode64FromInt(i)
+		if err != nil {
+			t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+		}
 		padding := before.Padding(3)
 		//		after := padding.Unpadding()
 
@@ -125,28 +137,53 @@ func Test_Padding_Unpadding_逆関数チェック(t *testing.T) {
 
 func Test_newCode64charfromInt(t *testing.T) {
 	var actual *code64char
-	actual = newCode64CharfromInt(0)
+	var err error
+	actual, err = newCode64CharfromInt(0)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "0", t)
 
-	actual = newCode64CharfromInt(10)
+	actual, err = newCode64CharfromInt(10)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "a", t)
 
-	actual = newCode64CharfromInt(20)
+	actual, err = newCode64CharfromInt(20)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "f", t)
 
-	actual = newCode64CharfromInt(30)
+	actual, err = newCode64CharfromInt(30)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "k", t)
 
-	actual = newCode64CharfromInt(40)
+	actual, err = newCode64CharfromInt(40)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "p", t)
 
-	actual = newCode64CharfromInt(50)
+	actual, err = newCode64CharfromInt(50)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "u", t)
 
-	actual = newCode64CharfromInt(60)
+	actual, err = newCode64CharfromInt(60)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "z", t)
 
-	actual = newCode64CharfromInt(63)
+	actual, err = newCode64CharfromInt(63)
+	if err != nil {
+		t.Errorf("エラー値を返しました。 = [ %s ]", err.Error())
+	}
 	assert_newCode64CharfromInt(actual, "-", t)
 
 }
@@ -181,7 +218,7 @@ func Test_newCode64charfromString(t *testing.T) {
 }
 
 func Test_ToString(t *testing.T) {
-	c := NewCode64FromInt(64*64*11 + 64*21 + 31) //KFA
+	c, _ := NewCode64FromInt(64*64*11 + 64*21 + 31) //KFA
 
 	actual := c.ToString()
 	expected := "AFK"
@@ -192,7 +229,7 @@ func Test_ToString(t *testing.T) {
 }
 
 func Test_ToInt(t *testing.T) {
-	c := NewCode64FromInt(64*64*64*64*64*5 + 64*64*3 + 64*2 + 9)
+	c, _ := NewCode64FromInt(64*64*64*64*64*5 + 64*64*3 + 64*2 + 9)
 	actual := c.ToInt()
 	expected := 64*64*64*64*64*5 + 64*64*3 + 64*2 + 9
 

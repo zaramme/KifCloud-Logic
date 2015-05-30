@@ -26,7 +26,11 @@ func Test_getAndputTK_全パターン(t *testing.T) {
 		rsh = NewRshCodeInit()
 
 		// 盤面をコードに
-		rsh.Base_TK, rsh.Add_TK = getTKfromBoard(expectedBoard)
+		var err error
+		rsh.Base_TK, rsh.Add_TK, err = getTKfromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーを検出しました。... %e", err)
+		}
 
 		// コードから盤面を再現
 		putPieceFromTKandAdd(rsh)

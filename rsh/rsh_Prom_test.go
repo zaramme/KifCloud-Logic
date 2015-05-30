@@ -32,7 +32,11 @@ func Test_getAndPutProm_初期配置の全パターン(t *testing.T) {
 
 		rsh := NewRshCodeInit()
 		rsh.Board = b.NewBoardInit()
-		rsh.Add_Prom = getPromfromBoard(expectedBoard)
+		var err error
+		rsh.Add_Prom, err = getPromfromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 
 		//fmt.Printf("addprom = %d\n", rsh.Add_Prom.ToInt())
 		applyPiecesPromoted(rsh)
@@ -47,14 +51,23 @@ func Test_getAndPutProm_初期配置の全パターン(t *testing.T) {
 func Test_getAndPutProm_Rsh経由変換(t *testing.T) {
 
 	brd := b.NewBoardInit()
-	rsh := ConvertRshFromBoard(brd)
+	rsh, err := ConvertRshFromBoard(brd)
+	if err != nil {
+		t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+	}
 	max := 64 * 64
 	for i := 0; i < max; i++ {
-		rsh.Add_Prom = code.NewCode64FromInt(i)
-		prev := rsh.ToString()
+		rsh.Add_Prom, _ = code.NewCode64FromInt(i)
+		prev, err := rsh.ToString()
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 
 		rsh2, _ := NewRshCodeFromString(prev)
-		curr := rsh2.ToString()
+		curr, err := rsh2.ToString()
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+		}
 		if prev != curr {
 			t.Errorf("Add_Promの変換値が異なっています。\nprev= %s, \ncurr= %s", prev, curr)
 			return
