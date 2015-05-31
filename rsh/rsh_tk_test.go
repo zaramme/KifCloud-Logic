@@ -32,6 +32,11 @@ func Test_getAndputTK_全パターン(t *testing.T) {
 			t.Errorf("エラーを検出しました。... %e", err)
 		}
 
+		if len(rsh.Base_TK) != 2 {
+			t.Errorf("tkの値が不正です。turn{%s},black{%d,%d},white{%d,%d} => tk = %s", turn.Output(), black_x, black_y, white_x, white_y, rsh.Base_TK.ToString())
+			return
+		}
+
 		// コードから盤面を再現
 		putPieceFromTKandAdd(rsh)
 

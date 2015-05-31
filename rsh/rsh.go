@@ -1,12 +1,13 @@
 package rsh
 
 import (
+	//	"fmt"
+	"fmt"
 	b "github.com/zaramme/KifCloud-Logic/board"
 	"github.com/zaramme/KifCloud-Logic/code"
 	def "github.com/zaramme/KifCloud-Logic/define"
 	"github.com/zaramme/KifCloud-Logic/math"
 	s "github.com/zaramme/KifCloud-Logic/structs"
-	//"fmt"
 )
 
 type Position s.Position
@@ -100,7 +101,11 @@ func NewRshCodeInit() *RshCode {
 
 // CAUTION : add未対応
 func NewRshCodeFromString(s string) (rsh *RshCode, err error) {
-	err = nil
+	if len(s) <= 37 {
+		err = fmt.Errorf("rsh文字列の長さが不正です。rsh = [%s]", s)
+		return nil, err
+	}
+
 	rsh = NewRshCodeInit()
 
 	extract := func(start, end int) (str string) {
@@ -108,7 +113,8 @@ func NewRshCodeFromString(s string) (rsh *RshCode, err error) {
 		return string(r[start:end])
 	}
 
-	rsh.Base_TK, _ = code.NewCode64FromString(extract(0, 2))
+	tk, _ := code.NewCode64FromString(extract(0, 2))
+	rsh.Base_TK = tk.Unpadding()
 	rsh.Base_M2, _ = code.NewCode64FromString(extract(2, 7))
 	rsh.Base_KIN, _ = code.NewCode64FromString(extract(7, 12))
 	rsh.Base_GIN, _ = code.NewCode64FromString(extract(12, 17))

@@ -88,6 +88,9 @@ func getTKfromBoard(brd *b.Board) (tk, add_tk code.Code64, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	if len(tk) < 2 {
+		tk = tk.Padding(2)
+	}
 
 	add_tk, err = code.NewCode64FromInt(add_tk_black + add_tk_white*2)
 	if err != nil {

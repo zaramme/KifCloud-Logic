@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	b "github.com/zaramme/KifCloud-Logic/board"
 	k "github.com/zaramme/KifCloud-Logic/kifLoader"
 	m "github.com/zaramme/KifCloud-Logic/move"
@@ -14,6 +15,19 @@ type Set struct {
 	Prev    string
 	Current string
 	Move    m.PlayingDescriptor
+}
+
+type ErrorForUser struct {
+	errString string
+}
+
+func newErrorForUser(str string) ErrorForUser {
+	err := ErrorForUser{errString: str}
+	return err
+}
+
+func (this ErrorForUser) Error() string {
+	return this.errString
 }
 
 func (this Set) OutPut() string {
@@ -66,9 +80,14 @@ func NewRoutesFromKifuFile(kif *k.KifFile) (rou Routes, err error) {
 			Routes[i-1].Current = str2
 		}
 		err = currentboard.AddMove(move)
-
 		if err != nil {
 			return Routes, err
+		}
+
+		isValid, errors := currentboard.IsValid()
+		if !isValid {
+			fmt.Printf("不正な盤面を検出しました。[ %s ]", errors)
+			return nil, newErrorForUser(errors)
 		}
 	}
 

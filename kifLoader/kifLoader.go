@@ -137,11 +137,11 @@ func mappingMoves(mList []string) (rList moveList, err error) {
 		line := mList[n]
 		// コメント行は無視
 		if s.HasPrefix(line, COMMENT_PREFIX) {
-			fmt.Printf("[n = %d]コメント行を無視します", n)
+			//			fmt.Printf("[n = %d]コメント行を無視します", n)
 			continue
 		}
 		if len([]byte(line)) < 1 {
-			fmt.Printf("[n = %d]空行を無視します。")
+			//			fmt.Printf("[n = %d]空行を無視します。")
 			continue
 		}
 		// 空行で分割

@@ -61,9 +61,15 @@ func Test_getAndPutProm_Rsh経由変換(t *testing.T) {
 		prev, err := rsh.ToString()
 		if err != nil {
 			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+			return
 		}
 
-		rsh2, _ := NewRshCodeFromString(prev)
+		rsh2, err := NewRshCodeFromString(prev)
+		if err != nil {
+			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
+			return
+		}
+
 		curr, err := rsh2.ToString()
 		if err != nil {
 			t.Errorf("エラーを検出しました。 error = [ %s ]", err)
