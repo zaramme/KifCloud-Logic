@@ -93,9 +93,9 @@ func (board Board) GetHashID() {
 
 }
 
-func (board *Board) isValid() (isValid bool, errOutput string) {
+func (board *Board) IsValid() (isValid bool, errOutput string) {
 
-	isValid = false
+	isValid = true
 
 	bOutput := make([]byte, 0)
 	appendErr := func(str string) {
