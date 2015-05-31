@@ -291,6 +291,9 @@ func getP18fromBoard(brd *b.Board) (black, white, cap, add_Prom, add_ExCap code.
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
+
+	black = black.Padding(5)
+	white = white.Padding(5)
 	return black, white, cap, add_ExCap, add_Prom, nil
 }
 

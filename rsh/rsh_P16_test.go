@@ -6,7 +6,7 @@ import (
 	//	mv "../move"
 	"fmt"
 	s "github.com/zaramme/KifCloud-Logic/structs"
-	//	"strconv"
+	"strconv"
 	"testing"
 )
 
@@ -14,156 +14,213 @@ func __rsh_p16test() {
 	fmt.Print()
 }
 
-// func Test_getAndputP16BlackWhite_全パターン(t *testing.T) {
+func Test_getAndPutP16Black_先手駒10000パターン(t *testing.T) {
+	// テストパターン
+	strToPlist := func(num int) []s.Position {
+		pList := make([]s.Position, 0)
+		for i := 1; i <= 9; i++ {
+			if num < 1 {
+				break
+			}
+			y := num % 10
+			pos := s.Position{i, y}
+			pList = append(pList, pos)
+			num = num / 10
+		}
+		return pList
+	}
 
-// 	var rsh *RshCode
+	errCount := 0
+	testCase := func(posList []s.Position) {
+		brd := b.NewBoard()
 
-// 	// テストパターン
-// 	testCase := func(posList []s.Position, player def.Player, id string) {
+		for _, pos := range posList {
+			brd.PositionMap[pos] = s.PieceStates{true, false, def.FU}
+		}
 
-// 		expectedBoard := b.NewBoard()
+		rsh := NewRshCodeInit()
+		var err error
+		rsh.Base_P18Black, rsh.Base_P18White, _, _, _, err = getP18fromBoard(brd)
+		if err != nil {
+			t.Errorf("エラーを検出しました。error = %s", err.Error())
+		}
 
-// 		// 盤面の設定
-// 		expectedBoard.Turn = def.BLACK
+		if len(rsh.Base_P18Black) != 5 {
+			t.Errorf("Base_P18Blackの文字数が異常です。p18Black = %s\n posList = %+v", rsh.Base_P18Black.ToString(), posList)
+			errCount++
+			return
+		}
+	}
 
-// 		for _, pos := range posList {
-// 			nilPos := s.Position{0, 0}
-// 			if pos == nilPos {
-// 				continue
-// 			}
-// 			//fmt.Printf("[配置%d … %s]", index, pos.Output())
-// 			expectedBoard.PositionMap[pos] = s.PieceStates{player, false, def.FU}
-// 		}
-// 		//		fmt.Print("\n")
+	for i := 0; i < 1000000000; i += 10101 {
+		pList := strToPlist(i)
+		testCase(pList)
+		if errCount > 100 {
+			break
+		}
+	}
 
-// 		rsh = NewRshCodeInit()
-// 		rsh.Base_P18Black, rsh.Base_P18White, _, _, _ = getP18fromBoard(expectedBoard)
+	pList := strToPlist(999999999)
+	testCase(pList)
 
-// 		putPiecefromP16(rsh)
+}
 
-// 		//fmt.Printf("id=%s\n", string(strByte))
-// 		assert_EachPositionOfBoard(expectedBoard, rsh.Board, id, t)
-// 	}
+func Test_getAndPutP16Black_後手駒10000パターン(t *testing.T) {
+	// テストパターン
+	strToPlist := func(num int) []s.Position {
+		pList := make([]s.Position, 0)
+		for i := 1; i <= 9; i++ {
+			if num < 1 {
+				break
+			}
+			y := num % 10
+			pos := s.Position{i, y}
+			pList = append(pList, pos)
+			num = num / 10
+		}
+		return pList
+	}
 
-// 	for i := 0; i <= 999999999; i += 10101 {
-// 		psList := make([]s.Position, 9)
+	errCount := 0
+	testCase := func(posList []s.Position) {
+		brd := b.NewBoard()
 
-// 		p := i
-// 		index := 0
-// 		for p != 0 {
-// 			if p%10 != 0 {
-// 				psList[index] = s.Position{index + 1, p % 10}
-// 			}
-// 			p = p / 10
-// 			index++
-// 		}
+		for _, pos := range posList {
+			brd.PositionMap[pos] = s.PieceStates{false, false, def.FU}
+		}
 
-// 		//		fmt.Printf("i=%d, len=%d", i, len(psList))
-// 		if len(psList) > 0 {
-// 			testCase(psList, true, strconv.Itoa(i))
-// 		} else {
-// 			//			fmt.Printf("(no pieces)\n")
-// 		}
-// 	}
+		rsh := NewRshCodeInit()
+		var err error
+		_, rsh.Base_P18White, _, _, _, err = getP18fromBoard(brd)
+		if err != nil {
+			t.Errorf("エラーを検出しました。error = %s", err.Error())
+		}
 
-// }
+		if len(rsh.Base_P18White) != 5 {
+			t.Errorf("Base_P18whiteの文字数が異常です。p18Black = %s\n posList = %+v", rsh.Base_P18White.ToString(), posList)
+			errCount++
+			return
+		}
 
-// func Test_getAndputP16cap_exCap_全パターン(t *testing.T) {
+	}
 
-// 	var rsh *RshCode
+	// パターンを走査する
+	for i := 0; i < 1000000000; i += 10101 {
+		pList := strToPlist(i)
+		testCase(pList)
+		if errCount > 100 {
+			break
+		}
+	}
 
-// 	// テストパターン
-// 	testCase := func(capBlack, capWhite int) {
+	pList := strToPlist(999999999)
+	testCase(pList)
 
-// 		expectedBoard := b.NewBoard()
+}
 
-// 		// 盤面の設定
-// 		expectedBoard.Turn = def.BLACK
+func Test_getAndputP16cap_exCap_全パターン(t *testing.T) {
 
-// 		expectedBoard.CapturedMap[s.CapArea{def.BLACK, def.FU}] = capBlack
-// 		expectedBoard.CapturedMap[s.CapArea{def.WHITE, def.FU}] = capWhite
+	var rsh *RshCode
 
-// 		rsh = NewRshCodeInit()
-// 		rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom = getP18fromBoard(expectedBoard)
+	// テストパターン
+	testCase := func(capBlack, capWhite int) {
 
-// 		putPiecefromP16(rsh)
+		expectedBoard := b.NewBoard()
 
-// 		//idの決定
-// 		strByte := make([]byte, 0)
+		// 盤面の設定
+		expectedBoard.Turn = def.BLACK
 
-// 		appendString := func(str string) {
-// 			strByte = append(strByte, []byte(str)...)
-// 		}
+		expectedBoard.CapturedMap[s.CapArea{def.BLACK, def.FU}] = capBlack
+		expectedBoard.CapturedMap[s.CapArea{def.WHITE, def.FU}] = capWhite
 
-// 		appendString(strconv.Itoa(capBlack))
-// 		appendString(",")
-// 		appendString(strconv.Itoa(capWhite))
+		rsh = NewRshCodeInit()
+		var err error
+		rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom, err = getP18fromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーが検出されました。error = %s", err.Error())
+		}
+		putPiecefromP16(rsh)
 
-// 		// fmt.Printf("id=%s, ", string(strByte))
+		//idの決定
+		strByte := make([]byte, 0)
 
-// 		assert_EachPositionOfBoard(expectedBoard, rsh.Board, string(strByte), t)
-// 	}
+		appendString := func(str string) {
+			strByte = append(strByte, []byte(str)...)
+		}
 
-// 	for black := 0; black < 19; black++ {
-// 		for white := 0; white < 19; white++ {
-// 			if black+white < 19 {
-// 				testCase(black, white)
-// 			}
-// 		}
-// 	}
-// }
+		appendString(strconv.Itoa(capBlack))
+		appendString(",")
+		appendString(strconv.Itoa(capWhite))
 
-// func Test_getAndputP16Prom_単一座標(t *testing.T) {
+		// fmt.Printf("id=%s, ", string(strByte))
 
-// 	var rsh *RshCode
+		assert_EachPositionOfBoard(expectedBoard, rsh.Board, string(strByte), t)
+	}
 
-// 	// テストパターン
-// 	testCase := func(posList []s.Position, plyList []def.Player) {
+	for black := 0; black < 19; black++ {
+		for white := 0; white < 19; white++ {
+			if black+white < 19 {
+				testCase(black, white)
+			}
+		}
+	}
+}
 
-// 		expectedBoard := b.NewBoard()
+func Test_getAndputP16Prom_単一座標(t *testing.T) {
 
-// 		// 盤面の設定
-// 		expectedBoard.Turn = def.BLACK
+	var rsh *RshCode
 
-// 		for index, pos := range posList {
-// 			expectedBoard.PositionMap[pos] = s.PieceStates{plyList[index], true, def.FU}
-// 		}
+	// テストパターン
+	testCase := func(posList []s.Position, plyList []def.Player) {
 
-// 		rsh = NewRshCodeInit()
-// 		rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom = getP18fromBoard(expectedBoard)
+		expectedBoard := b.NewBoard()
 
-// 		putPiecefromP16(rsh)
+		// 盤面の設定
+		expectedBoard.Turn = def.BLACK
 
-// 		//idの決定
-// 		strByte := make([]byte, 0)
+		for index, pos := range posList {
+			expectedBoard.PositionMap[pos] = s.PieceStates{plyList[index], true, def.FU}
+		}
 
-// 		appendString := func(str string) {
-// 			strByte = append(strByte, []byte(str)...)
-// 		}
-// 		appendString("[")
+		rsh = NewRshCodeInit()
+		var err error
+		rsh.Base_P18Black, rsh.Base_P18White, rsh.Base_P18Cap, rsh.Add_P18ExCap, rsh.Add_P18Prom, err = getP18fromBoard(expectedBoard)
+		if err != nil {
+			t.Errorf("エラーが検出されました。error = %s", err.Error())
+		}
 
-// 		for _, pos := range posList {
-// 			appendString(pos.Output())
-// 		}
-// 		appendString("]")
+		putPiecefromP16(rsh)
 
-// 		// fmt.Printf("id=%s, ", string(strByte))
+		//idの決定
+		strByte := make([]byte, 0)
 
-// 		assert_EachPositionOfBoard(expectedBoard, rsh.Board, string(strByte), t)
-// 	}
+		appendString := func(str string) {
+			strByte = append(strByte, []byte(str)...)
+		}
+		appendString("[")
 
-// 	for x := 1; x <= 9; x++ {
-// 		for y := 1; y <= 9; y++ {
-// 			testCase([]s.Position{s.Position{x, y}}, []def.Player{def.BLACK})
-// 		}
-// 	}
-// 	for x := 1; x <= 9; x++ {
-// 		for y := 1; y <= 9; y++ {
-// 			testCase([]s.Position{s.Position{x, y}}, []def.Player{def.WHITE})
-// 		}
-// 	}
+		for _, pos := range posList {
+			appendString(pos.Output())
+		}
+		appendString("]")
 
-// }
+		// fmt.Printf("id=%s, ", string(strByte))
+
+		assert_EachPositionOfBoard(expectedBoard, rsh.Board, string(strByte), t)
+	}
+
+	for x := 1; x <= 9; x++ {
+		for y := 1; y <= 9; y++ {
+			testCase([]s.Position{s.Position{x, y}}, []def.Player{def.BLACK})
+		}
+	}
+	for x := 1; x <= 9; x++ {
+		for y := 1; y <= 9; y++ {
+			testCase([]s.Position{s.Position{x, y}}, []def.Player{def.WHITE})
+		}
+	}
+
+}
 
 func Test_getAndputP16Prom_1から10駒(t *testing.T) {
 
@@ -219,9 +276,6 @@ func Test_164aryToCode64_最小値の長さ(t *testing.T) {
 	// //fmt.Printf("{1,2,3,4,5} = %s\n", code64.ToString())
 
 	// max164Array := []int{157, 158, 159, 160, 161}
-	// code64 = convert164AryToBase64(max164Array)
-	//fmt.Printf("{157,158,159,160,161} = %s\n", code64.ToString())
-
 }
 
 func getIdFromPosList(posList []s.Position) string {

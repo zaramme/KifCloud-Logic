@@ -53,6 +53,9 @@ func Test_ケース１_成り駒のエンコーディング(t *testing.T) {
 	// // brd2 := rsh.ToString()
 }
 
+func Test_Case2_APIエラーパターン1(t *testing.T) {
+}
+
 func strToBoard(str string, t *testing.T) *b.Board {
 	rsh, err := NewRshCodeFromString(str)
 	if err != nil {

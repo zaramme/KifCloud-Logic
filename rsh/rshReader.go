@@ -153,6 +153,7 @@ func putPiecefromP16(rsh *RshCode) {
 }
 
 func putPiecefromP16_Position(code code.Code64, player def.Player, brd *b.Board) {
+	code = code.Unpadding()
 	digit := code.ToInt()
 
 	//fmt.Printf("digit = %d\n", digit)
