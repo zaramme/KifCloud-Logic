@@ -111,7 +111,7 @@ func convertKifCodeToMoveCode(kifCode string, turn int) (move m.PlayingDescripto
 		case DROP:
 			prevStart = 0
 		default:
-			return nil, fmt.Errorf("文字列変換に失敗しました。")
+			return nil, fmt.Errorf("指し手の変換に失敗しました")
 		}
 	}
 
@@ -163,7 +163,7 @@ func convertMBtoInt(r rune) (i int, err error) {
 	case MB_9:
 		return 9, nil
 	}
-	return 0, fmt.Errorf("不正な文字コードを検出しました・・・%s", string(r))
+	return 0, fmt.Errorf("指し手の行頭は数字である必要があります", string(r))
 
 }
 
@@ -188,7 +188,7 @@ func convertCCtoInt(r rune) (i int, err error) {
 	case CC_9:
 		return 9, nil
 	}
-	return 0, fmt.Errorf("不正な文字コードを検出しました・・・%s", string(r))
+	return 0, fmt.Errorf("指し手の変換に失敗しました", string(r))
 
 }
 

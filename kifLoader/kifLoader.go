@@ -25,6 +25,15 @@ type KifFile struct {
 }
 type moveList []m.PlayingDescriptor
 
+type ErrorForUser struct {
+	SystemError string
+	UserError   string
+}
+
+func (this ErrorForUser) Error() string {
+	return this.SystemError
+}
+
 ////////////////////////////////////////////////////////////
 // Public Method
 func LoadKifFile(file *os.File) (kif *KifFile, err error) {
@@ -49,20 +58,23 @@ func LoadStringList(sList []string) (kif *KifFile, err error) {
 	// セパレータを検出して対局情報と指し手情報に分割
 	infoList, moveList, err := separate(sList)
 	if err != nil {
-		return nil, err
+		usrErr := ".kifファイルの読み込みに失敗しました"
+		return nil, ErrorForUser{err.Error(), usrErr}
 	}
 
 	///////////////////////////////////////////////////////
 	// 対局情報の検出
 	info, err := mappingInfo(infoList)
 	if err != nil {
-		return nil, err
+		usrErr := "対局情報の読み込みに失敗しました"
+		return nil, ErrorForUser{err.Error(), usrErr}
 	}
 	///////////////////////////////////////////////////////
 	// 指し手情報を検出
 	moves, err := mappingMoves(moveList)
 	if err != nil {
-		return nil, err
+		usrErr := "指し手の読み込みに失敗しました"
+		return nil, ErrorForUser{err.Error(), usrErr}
 	}
 	///////////////////////////////////////////////////////
 	// オブジェクトを生成
@@ -147,8 +159,7 @@ func mappingMoves(mList []string) (rList moveList, err error) {
 		// 空行で分割
 		fields := s.Fields(line)
 		if len(fields) < 2 {
-			err = fmt.Errorf("[n=%d]スプリットに失敗しました。= (%s)\n", n, line)
-			return nil, err
+			return nil, fmt.Errorf("[n=%d]スプリットに失敗しました。= (%s)\n", n, line)
 		}
 		// 手数を検出
 		moveNum, err := strconv.Atoi(fields[0])
