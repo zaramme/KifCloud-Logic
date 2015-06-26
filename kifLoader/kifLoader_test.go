@@ -3,6 +3,7 @@ package kifLoader
 import (
 	"bufio"
 	"fmt"
+	m "github.com/zaramme/KifCloud-Logic/move"
 	"os"
 	"strconv"
 	"testing"
@@ -17,6 +18,7 @@ const debug_mappingInfo = false
 const debug_mappingMove = false
 
 const filePath_normal = "testFiles/sampleKif.kif"
+const filePath_hasRepeatMove = "testFiles/test_HasRepeatMove.kif"
 
 const filePath_real_prefix = "testFiles/real/get_"
 const filePath_real_extention = ".kif"
@@ -40,6 +42,7 @@ const filePath_error_invalidInfo2 = "testFiles/test_invalidInfo_2.kif"
 //////////////////////////////////////////////////////////////////////
 // 正常系
 func Test_LoadKifFile(t *testing.T) {
+
 	file, err_of := testUtil_openFileStream(filePath_normal, t)
 	if err_of != nil {
 		t.Errorf("ファイル読み込みに失敗しました。(error＝%s)", err_of.Error())
@@ -89,6 +92,7 @@ func Test_LoadKifFile_realCases(t *testing.T) {
 	}
 }
 func Test_readFile(t *testing.T) {
+
 	file, err_of := testUtil_openFileStream(filePath_normal, t)
 	if err_of != nil {
 		t.Errorf("ファイル読み込みに失敗しました。(error＝%s)", err_of.Error())
@@ -372,4 +376,32 @@ func tetsUtil_readFile(filePath string, t *testing.T) (sList []string, err error
 		return nil, err
 	}
 	return sList, nil
+}
+
+func Test_hasRepeatMove(t *testing.T) {
+	file, err_of := testUtil_openFileStream(filePath_hasRepeatMove, t)
+	if err_of != nil {
+		t.Errorf("ファイル読み込みに失敗しました。(error＝%s)", err_of.Error())
+	}
+	KifFile, err_lk := LoadKifFile(file)
+	if err_lk != nil {
+		t.Errorf("ファイル読み込みに失敗しました。(error＝%s)", err_lk.Error())
+		return
+	}
+
+	fmt.Println(KifFile.Info)
+
+	for n, move := range KifFile.Moves {
+		fmt.Printf("[ %d ]\n", n)
+		switch desc := move.(type) {
+		case *m.Move:
+			fmt.Println("type:move[%v]", desc)
+		case *m.EndGame:
+			fmt.Println("type:EndGame[%v]", desc)
+		case *m.RepeatMove:
+			println("type:RepeatMove[%v]", desc)
+		}
+
+		fmt.Printf("\n")
+	}
 }

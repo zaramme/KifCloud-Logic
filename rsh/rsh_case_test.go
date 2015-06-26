@@ -53,7 +53,28 @@ func Test_ケース１_成り駒のエンコーディング(t *testing.T) {
 	// // brd2 := rsh.ToString()
 }
 
-func Test_Case2_APIエラーパターン1(t *testing.T) {
+func Test_特定盤面変換_hotFix2(t *testing.T) {
+
+	asrtCapAreaValid := func(id string, b *b.Board) {
+		for key, value := range b.CapturedMap {
+			if value < 0 {
+				t.Errorf("[%s]持ち駒の値が不正です。[%s] => %d", id, key.Output(), value)
+			}
+		}
+	}
+	str := "nQh1jwhjVAqBKRJn5o0e4RpgUghsc_b4F4CJn0"
+	//str := "vh1jwhjVAqBKRJn5o0e4RpgUghsc_b4F4CJn0"
+	rsh, _ := NewRshCodeFromString(str)
+	board := BuildBoardFromRshCode(rsh)
+
+	asrtCapAreaValid("1", board)
+
+	board.AddMove(mv.NewMoveFromMoveCode("w12OH_23"))
+	asrtCapAreaValid("2", board)
+
+	board.AddMove(mv.NewMoveFromMoveCode("b56GI_67"))
+	asrtCapAreaValid("3", board)
+
 }
 
 func strToBoard(str string, t *testing.T) *b.Board {

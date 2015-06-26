@@ -145,18 +145,21 @@ func mappingInfo(iList []string) (iMap map[string]string, err error) {
 func mappingMoves(mList []string) (rList moveList, err error) {
 
 	rList = make(moveList, 0)
+
+	// mListを列挙する
 	for n := 0; n < len(mList); n++ {
 		line := mList[n]
 		// コメント行は無視
 		if s.HasPrefix(line, COMMENT_PREFIX) {
-			//			fmt.Printf("[n = %d]コメント行を無視します", n)
 			continue
 		}
+
+		// 空行は無視
 		if len([]byte(line)) < 1 {
-			//			fmt.Printf("[n = %d]空行を無視します。")
 			continue
 		}
-		// 空行で分割
+
+		// 半角スペースで分割
 		fields := s.Fields(line)
 		if len(fields) < 2 {
 			return nil, fmt.Errorf("[n=%d]スプリットに失敗しました。= (%s)\n", n, line)
@@ -170,11 +173,25 @@ func mappingMoves(mList []string) (rList moveList, err error) {
 		if len(rList) < moveNum {
 			rList = extendSlice(rList, moveNum)
 		}
-		rList[moveNum-1], err = convertKifCodeToMoveCode(fields[1], moveNum)
+
+		// 指し手情報を読み込み
+		desc, err := convertKifCodeToMoveCode(line, moveNum)
 		if err != nil {
 			err = fmt.Errorf("[n=%d]記号の変換に失敗しました。。= (%s)\n", n, line)
 			return nil, err
 		}
+		if repeatMove, ok := desc.(*m.RepeatMove); ok {
+			previousMove := rList[moveNum-2]
+			switch t := previousMove.(type) {
+			case *m.Move:
+				repeatMove.SetMove(t)
+			case *m.RepeatMove:
+				repeatMove.SetMove(t.GetMove())
+			}
+		}
+
+		rList[moveNum-1] = desc
+
 	}
 
 	return rList, err

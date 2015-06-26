@@ -50,9 +50,13 @@ const (
 )
 
 const (
-	DROP      = "打"
-	PROMOTION = "成"
-	BRACKET   = "("
+	REPEAT        = "同"
+	DROP          = "打"
+	PROMOTION     = "成"
+	BRACKET_START = "("
+	BRACKET_END   = ")"
+	BLANK_SB      = " "
+	BLANK_MB      = "　"
 )
 
 const RESIGNED = "投了"
@@ -61,85 +65,238 @@ const END_PREFIX = "まで"
 func convertKifCodeToMoveCode(kifCode string, turn int) (move m.PlayingDescriptor, err error) {
 
 	kifChars := []rune(kifCode)
+	seq := 0 //現在の文字認識位置
 
-	var localErr error
-	var nextX, nextY int
-	var prevX, prevY int
-
-	isPromotion := def.IsPromoted(false)
+	var next s.Position
+	var prev s.Position
 	var kop def.KindOfPiece
-
-	var prevStart int
-	var kopStart int
-
+	var currentP def.IsPromoted
 	player := def.Player(turn%2 == 1)
 
-	endGame := m.NewEndGameWithString(kifCode, player)
+	// 行頭の半角数字をスキップ
+	skipSbNums(kifChars, &seq)
+
+	///////////////////////////////////////////////////
+	// 対局終了の検出
+
+	skipBlank(kifChars, &seq)
+	endGame := m.NewEndGameWithString(string(kifChars[seq:]), player)
 
 	if endGame != nil {
 		return endGame, nil
 	}
 
+	///////////////////////////////////////////////////
+	// 「同」記号の検出
+	isRepeat := checkRepeat(kifChars, &seq)
+	if isRepeat {
+		currentP = false
+		currentP = recognizePromotion(kifChars, &seq, currentP)
+		kop, currentP = recognizePiece(kifChars, &seq, currentP)
+		currentP = recognizePromotion(kifChars, &seq, currentP)
+		prev, ok := recognizePrev(kifChars, &seq)
+		if !ok {
+			return nil, fmt.Errorf("符号の認識に失敗しました。input = %s", kifCode)
+		}
+
+		rMove := new(m.RepeatMove)
+
+		rMove.PieceStates = s.PieceStates{player, currentP, kop}
+		rMove.Prev = prev
+
+		return rMove, nil
+	}
+
+	///////////////////////////////////////////////////
+	// 通常の指し手の検出
+
 	mv := new(m.Move)
+	currentIsP := def.IsPromoted(false)
+	var ok bool
 
-	// 先頭の全角文字をintに変換
-	nextX, localErr = convertMBtoInt(kifChars[0])
-	if localErr != nil {
-		return nil, localErr
+	next, ok = recognizeNext(kifChars, &seq)
+	if !ok {
+		return nil, fmt.Errorf("符号の認識に失敗しました。input = %s", kifCode)
 	}
 
-	// 二番目の漢数字をintに変換
-	nextY, localErr = convertCCtoInt(kifChars[1])
-	if localErr != nil {
-		return nil, localErr
+	currentIsP = recognizePromotion(kifChars, &seq, currentIsP)
+
+	kop, currentIsP = recognizePiece(kifChars, &seq, currentIsP)
+
+	currentIsP = recognizePromotion(kifChars, &seq, currentIsP)
+
+	prev, ok = recognizePrev(kifChars, &seq)
+	if !ok {
+		return nil, fmt.Errorf("符号の認識に失敗しました。input = %s", kifCode)
 	}
 
-	if string(kifChars[2]) == PROMOTION {
-		// ３文字目が「成」の場合
-		kopStart = 3
-		isPromotion = true
-		prevStart = 5
-	} else {
-		// ３文字目が「成」以外の場合
-		kopStart = 2
-		switch string(kifChars[3]) {
-		case BRACKET:
-			prevStart = 4
-		case PROMOTION:
-			isPromotion = true
-			prevStart = 5
-		case DROP:
-			prevStart = 0
-		default:
-			return nil, fmt.Errorf("指し手の変換に失敗しました")
-		}
-	}
-
-	tmpPromotion := def.IsPromoted(false)
-	kop, tmpPromotion, localErr = convertKOPtoKindOfPeace(kifChars[kopStart])
-	if localErr != nil {
-		return nil, localErr
-	}
-
-	if isPromotion == false && tmpPromotion == true {
-		isPromotion = true
-	}
-
-	if prevStart == 0 {
-		prevX, prevY = 0, 0
-		if localErr != nil {
-			return nil, localErr
-		}
-	} else {
-		prevX, prevY, localErr = convertDuoToPrevPos(kifChars[prevStart : prevStart+2])
-	}
-
-	mv.Player = def.Player(player)
-	mv.Prev = s.Position{prevX, prevY}
-	mv.Next = s.Position{nextX, nextY}
-	mv.IsPromoted = isPromotion
+	mv.Player = player
+	mv.Prev = prev
+	mv.Next = next
+	mv.IsPromoted = currentIsP
 	mv.KindOfPiece = kop
+
 	return mv, nil
+}
+
+func skipSbNums(rList []rune, seq *int) {
+	skipBlank(rList, seq)
+	for {
+		_, err := strconv.Atoi(string(rList[*seq]))
+		if err != nil {
+			break
+		}
+		*seq++
+	}
+}
+
+func skipBlank(rList []rune, seq *int) {
+	for {
+		if len(rList) == *seq {
+			break
+		}
+
+		str := string(rList[*seq])
+		if str == BLANK_MB || str == BLANK_SB {
+			*seq++
+			continue
+		}
+		break
+	}
+}
+
+func recognizePiece(rList []rune, seq *int, currentP def.IsPromoted) (kop def.KindOfPiece, isP def.IsPromoted) {
+	skipBlank(rList, seq)
+
+	isP = currentP
+
+	hit := false
+
+	switch string(rList[*seq]) {
+	case KOP_OH:
+		kop = def.OH
+		hit = true
+	case KOP_KIN:
+		kop = def.KIN
+		hit = true
+	case KOP_GIN:
+		kop = def.GIN
+		hit = true
+	case KOP_KEI:
+		kop = def.KEI
+		hit = true
+	case KOP_KYO:
+		kop = def.KYO
+		hit = true
+	case KOP_KAKU:
+		kop = def.KAKU
+		hit = true
+	case KOP_HISHA:
+		kop = def.HISHA
+		hit = true
+	case KOP_FU:
+		kop = def.FU
+		hit = true
+	case KOP_GIN_P:
+		kop = def.GIN
+		isP = true
+		hit = true
+	case KOP_KEI_P:
+		kop = def.KEI
+		isP = true
+		hit = true
+	case KOP_KYO_P:
+		kop = def.KYO
+		isP = true
+		hit = true
+	case KOP_KAKU_P:
+		kop = def.KAKU
+		isP = true
+		hit = true
+	case KOP_HISHA_P:
+		kop = def.HISHA
+		isP = true
+		hit = true
+	case KOP_FU_P:
+		kop = def.FU
+		isP = true
+		hit = true
+	}
+
+	if hit {
+		*seq++
+	}
+	return
+
+}
+
+func recognizePromotion(rList []rune, seq *int, currentP def.IsPromoted) (isP def.IsPromoted) {
+	skipBlank(rList, seq)
+	isP = currentP
+
+	if string(rList[*seq]) == PROMOTION {
+		*seq++
+		isP = true
+	}
+
+	return isP
+}
+
+func recognizeNext(rList []rune, seq *int) (next s.Position, ok bool) {
+	skipBlank(rList, seq)
+
+	X, err := convertMBtoInt(rList[*seq])
+	if err != nil {
+		return next, false
+	}
+	*seq++
+
+	Y, err := convertCCtoInt(rList[*seq])
+	if err != nil {
+		return next, false
+	}
+
+	*seq++
+	next = s.Position{X, Y}
+
+	return next, true
+
+}
+
+func recognizePrev(rList []rune, seq *int) (prev s.Position, ok bool) {
+	skipBlank(rList, seq)
+
+	if string(rList[*seq]) == DROP {
+		*seq++
+		return s.Position{0, 0}, true
+	}
+
+	if string(rList[*seq]) != BRACKET_START {
+		return prev, false
+	}
+	*seq++
+
+	X, err := strconv.Atoi(string(rList[*seq]))
+	if err != nil {
+		return prev, false
+	}
+	*seq++
+
+	Y, err := strconv.Atoi(string(rList[*seq]))
+	if err != nil {
+		return prev, false
+	}
+	*seq++
+
+	if string(rList[*seq]) != BRACKET_END {
+		return prev, false
+	}
+	*seq++
+
+	prev = s.Position{X, Y}
+
+	return prev, true
+
 }
 
 func convertMBtoInt(r rune) (i int, err error) {
@@ -227,17 +384,21 @@ func convertKOPtoKindOfPeace(r rune) (kop def.KindOfPiece, isP def.IsPromoted, e
 
 }
 
-func convertDuoToPrevPos(r []rune) (x, y int, err error) {
-
-	x, err = strconv.Atoi(string(r[0:1]))
-	if err != nil {
-		return 0, 0, fmt.Errorf("不正な文字コードを検出しました...　%s", string(r[0:1]))
+func checkRepeat(rList []rune, seq *int) bool {
+	switch string(rList[*seq]) {
+	case REPEAT:
+		*seq++
+		return true
 	}
+	return false
+}
 
-	y, err = strconv.Atoi(string(r[1:2]))
-	if err != nil {
-		return 0, 0, fmt.Errorf("不正な文字コードを検出しました...　%s", string(r[1:2]))
+func checkBlank(r rune) bool {
+	switch string(r) {
+	case BLANK_SB:
+		return true
+	case BLANK_MB:
+		return true
 	}
-
-	return x, y, nil
+	return false
 }

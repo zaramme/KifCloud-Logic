@@ -57,11 +57,20 @@ func NewRoutesFromKifuFile(kif *k.KifFile) (rou Routes, err error) {
 		if err != nil {
 			return nil, err
 		}
-		move, ok := desk.(*m.Move)
 
-		if !ok {
-			Routes[i] = Set{
-				"", "", desk}
+		var move *m.Move
+		returnFlg := false
+		switch t := desk.(type) {
+		case *m.EndGame:
+			Routes[i] = Set{"", "", desk}
+			returnFlg = true
+		case *m.RepeatMove:
+			move = t.GetMove()
+		case *m.Move:
+			move = t
+		}
+
+		if returnFlg {
 			break
 		}
 
@@ -79,6 +88,8 @@ func NewRoutesFromKifuFile(kif *k.KifFile) (rou Routes, err error) {
 			}
 			Routes[i-1].Current = str2
 		}
+
+		//fmt.Printf("[NewRouteFromKifuFile]rsh変換... %s => %s \n", rsh.ToString(), move.ToJpnCode())
 		err = currentboard.AddMove(move)
 		if err != nil {
 			return Routes, err

@@ -65,7 +65,8 @@ func (this Player) OutputMark() string {
 }
 
 const (
-	OH = iota
+	UNDEFINED_PIECE = iota
+	OH
 	KIN
 	GIN
 	KEI

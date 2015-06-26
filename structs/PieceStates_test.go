@@ -31,15 +31,15 @@ func Test_const_load(t *testing.T) {
 		t.Errorf("定数値WHITEの読み込みに失敗しました")
 	}
 
-	if def.OH != 0 {
+	if def.OH != 1 {
 		t.Errorf("定数値OHの読み込みに失敗しました")
 	}
 
-	if def.KIN != 1 {
+	if def.KIN != 2 {
 		t.Errorf("定数値KINの読み込みに失敗しました")
 	}
 
-	if def.FU != 7 {
+	if def.FU != 8 {
 		t.Errorf("定数値FUの読み込みに失敗しました")
 	}
 }
